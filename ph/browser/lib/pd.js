@@ -43,6 +43,15 @@
                         key: 'id',
                         value: 'download-dialog-container'
                   }])
+            createElement(document.body,
+                  'input',
+                  [{
+                        key: 'id',
+                        value: 'donwload-link-input'
+                  },{
+                        key: 'style',
+                        value: 'display: none'
+                  }])
             const floatButton = '<button class="mdui-fab mdui-fab-fixed mdui-color-pink-accent mdui-ripple" style="z-index:999" id="download-dialog-open"> \
             <i class="mdui-icon material-icons">&#xe2c4;</i></button>';
             var fb = document.getElementById('pornhub-video-download-xxx');
@@ -50,17 +59,21 @@
 
             var dd = document.getElementById('download-dialog-container');
 
+            
             var trs = '';
             for(var attr in window){
                   if (attr.indexOf('qualityItems') !== -1){
                         var values = window[attr];
-                        values.forEach(v=>{
+                        
+                        values.forEach((v, i)=>{
+                              var id = 'll-select' + i;
+                              const link = '<input  class="mdui-textfield-input" type="text" readonly id="' + id +  '" style="border:none" value="' + v['url'] +'"/>'
                               trs += '<tr>\
                                     <td>' + v['id'] + '</td> \
                                     <td>' + v['text'] + '</td> \
-                                    <td>' + v['url'] + '</td> \
+                                    <td>' + link + '</td> \
                                     <td><a href="' + v['url'] + '" download="' + v['url'].split('/').pop().split('?')[0] +
-                                          '">'+ '下载</a></td>\
+                                          '">'+ '下载</a> <a href="javascript:doCopy(\''+ id +'\')">复制</a></td>\
                                     </tr>' 
                         })
                   }
@@ -102,8 +115,17 @@
             parent.appendChild(ele);
       }
       
+     
 
-      
 })();
 
 
+function doCopy(target) {
+      var e = document.getElementById(target);
+      e && e.select()
+      document.execCommand('copy');
+      mdui.snackbar({
+            message: 'Copy success!!!',
+            position: 'right-top'
+          });
+}
