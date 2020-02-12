@@ -397,23 +397,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('url', help='The novel chapter url')
     parser.add_argument('--title', '-t',
+                        nargs='?',
                         const=NAME,
                         help="The name of novel")
     parser.add_argument('--output', '-o',
+                        nargs='?',
                         const=defaultTextName() + '.txt',
                         help="The file output")
     parser.add_argument('--browser', '-b',
                         nargs='?',
                         type=strbool,
                         const=False,
-                        help='Using browser {}, not {}'.format(TRUE_FLAG, FALSE_FLAG))
-    parser.add_argument('--verbose', 'v',
+                        help='Using browser {}, not {}, default false'.format(TRUE_FLAG, FALSE_FLAG))
+    parser.add_argument('--verbose', '-v',
                         nargs='?',
                         type=strbool,
                         const=False,
-                        help='Printing chapter on the screen {}, not {}'.format(TRUE_FLAG, FALSE_FLAG))
+                        help='Printing chapter on the screen {}, not {}, default false'.format(TRUE_FLAG, FALSE_FLAG))
 
-    parser.add_argument('--time', 't',
+    parser.add_argument('--sec', '-s',
+                        nargs='?',
                         type=int,
                         const=5,
                         help='Each request will wait some time')
@@ -425,5 +428,5 @@ if __name__ == '__main__':
            using_chrome=args.browser,
            save_file=args.output,
            title=args.title).run()
-    
+
 
