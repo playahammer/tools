@@ -1,18 +1,12 @@
 {
       "name": "Pd",
       "description": "Pd test",
-      "version": "1.0.1",
-      "permissions": [
-            "activeTab",
-            "downloads"
-      ],
+      "version": "1.0.0",
+      "permissions": ["activeTab"],
       "content_scripts":[{
             "matches": ["https://*.pornhub.com/*","http://*.pornhub.com/*"],
             "js": ["lib/injection.js"]     
       }],
-      "browser_action":{
-            "default_popup": "popup.html"
-      },
       "web_accessible_resources": ["lib/pd.js"],
       "manifest_version": 2
 }
