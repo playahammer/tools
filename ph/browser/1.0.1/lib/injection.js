@@ -6,17 +6,9 @@ function injectCustomJS(jsPath)
       temp.src = chrome.extension.getURL(jsPath);
       document.head.appendChild(temp);
 }
-const pornhub_com_RegExp = /^https?:\/\/[^\/]*\.pornhub\.com/i
-const xvideos_com_RegExp = /^https?:\/\/[^\/]*\.xvideos\.com/i
 
-const url = window.location.href
+injectCustomJS();
 
-if (pornhub_com_RegExp.test(url)){
-      injectCustomJS('lib/pornhub-injection.js')
-}
-else if (xvideos_com_RegExp.test(url)){
-      injectCustomJS('lib/xvideos-injection.js')
-}
 
 window.addEventListener("message", function(event){
       if (event.source != window)
@@ -28,20 +20,12 @@ window.addEventListener("message", function(event){
                   /**
                    * Passing the message to the popup per 0.6 sec 
                    */
-                  
-                  this.send({cmd: 'push', data: data.value})
-                  
+                  window.setInterval(
+                        chrome.runtime.sendMessage, 600, {data: data.value}, function(response){
+                              // Noting to do
+                        }
+                  );
             }
       }
 }, false);
 
-this.send = function(msg){
-      var port = chrome.runtime.connect({name: "se23kknsef"})
-
-      port.onDisconnect.addListener(obj=>{
-            this.setTimeout(send, 600, msg)
-      })
-
-      port.postMessage(msg)
-
-}
