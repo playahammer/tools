@@ -14,7 +14,7 @@ window.onload = function(){
                   if(message) {
                         var items = message.data
                         var innerHTML = ""
-                        items.forEach((item, index) => {
+                        items && items.forEach((item, index) => {
                               innerHTML += "<tr><td>" + index + "</td><td>" + item.text + "</td><td><button class=\"download mdui-btn\" data-url=\"" + item.url + "\">下载</button></td></tr>"
                         })
                         

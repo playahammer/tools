@@ -36,12 +36,14 @@ window.addEventListener("message", function(event){
 }, false);
 
 this.send = function(msg){
-      var port = chrome.runtime.connect({name: "se23kknsef"})
+      if(typeof chrome.app.isInstalled !== "undefined"){
+            var port = chrome.runtime.connect({name: "se23kknsef"})
 
-      port.onDisconnect.addListener(obj=>{
-            this.setTimeout(send, 600, msg)
-      })
+            port.onDisconnect.addListener(obj=>{
+                  this.setTimeout(send, 600, msg)
+            })
 
-      port.postMessage(msg)
+            port.postMessage(msg)
+      }
 
 }
