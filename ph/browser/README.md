@@ -1,7 +1,11 @@
-# 更新日志
-## v1.0.2 2020-2-28
-修复了 chrome.runtime.lasterror 错误。新增支持 xvideos，但目前仅支持高质量与低质量两种格式。
-## v1.0.1 2020-2-27
-修复了下载跳转到播放的bug，并且减少了对网页的入侵。使用 popup 显示。
-## v1.0.0 2020-2-7
-第一个版本，有下载和复制链接功能。受到限制点击下载的时候会跳转到播放。
+# Ph
+This is a browser extension for downloading love action media in Pornhub and Xvideos. Note that it only runs on Chrome browser. Before you use this extension, make sure that you switch to open it in extension management panel and click menu bar while you are viewing the page where it contains the video, or the later will display this page doesn't have any avaliable video resource sitted in center of popup page.
+
+## Updating logs 
+### v1.0.2 2020-2-28
+Fixed ```chrome.runtime.lasterror```, newly supported xvideos, but only provided two quality forms of video: high and low.
+### v1.0.1 2020-2-27
+Fixed bugs jumping to play when it downloaded, and reduced invading into web page. Downloaded video information showed with popup.
+### v1.0.0 2020-2-7
+First version, basically had functions of copy and donwload links. If the donwload for videos is limited or denied, it would jump to play.
+
