@@ -1,7 +1,7 @@
 extern crate m3u8_rs;
 extern crate crypto;
 
-use reqwest::Error;
+use reqwest::{Error, Proxy};
 use reqwest::blocking::Client;
 use crypto::digest::Digest;
 use crypto::sha1::Sha1;
@@ -15,13 +15,15 @@ use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 pub struct Tsd{
       pub link: String,
       pub output: String,
-      pub logs_file: String
+      pub logs_file: String,
+      pub proxy: Option<Proxy>
 }
 
 #[derive(Debug)]
-enum ErrorWrapper{
+pub enum ErrorWrapper{
       IoError(io::Error),
-      ReError(reqwest::Error)
+      ReError(reqwest::Error),
+      SystemTimeError(SystemTimeError)
 }
 
 impl From<io::Error> for ErrorWrapper{
@@ -36,6 +38,13 @@ impl From<reqwest::Error> for ErrorWrapper{
       }
 }
 
+impl From<SystemTimeError> for ErrorWrapper{
+      fn from(val: SystemTimeError) -> Self {
+          ErrorWrapper::SystemTimeError(val)
+      }
+}
+
+
 
 fn sha1_gen(text: &str) -> String {
       let mut hasher = Sha1::new();
@@ -44,19 +53,34 @@ fn sha1_gen(text: &str) -> String {
 }
 
 impl Tsd {
-      pub fn new(link: String, output: String) -> Result<Tsd, SystemTimeError>{
+      pub fn new(link: String, output: String, proxy: Option<String>) -> Result<Tsd, ErrorWrapper>{
             let start = SystemTime::now();
             let since_the_epoch = start.duration_since(UNIX_EPOCH)?;
+
+            let proxy = if let Some(p) = proxy {
+                  reqwest::Proxy::http(&p).ok()
+            }else {
+                  None
+            };
 
             Ok(Tsd {
                   link,
                   output,
-                  logs_file: format!("{}.log",since_the_epoch.as_micros())
+                  logs_file: format!("{}.log",since_the_epoch.as_micros()),
+                  proxy
             })
       }
 
       fn get_m3u8_source(&self) -> Result<String, Error> {
-            let client = Client::new();
+            let mut client_builder = Client::builder().
+                        user_agent(
+                              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+                        );
+            if let Some(proxy) = self.proxy.clone() {
+                  client_builder = client_builder.proxy(proxy);
+            }
+            
+            let client = client_builder.build()?;
             let resp = client.get(&self.link).send()?;
             let text = resp.text()?;
             Ok(text)
@@ -97,7 +121,15 @@ impl Tsd {
       }
 
       fn download_ts(&self, ts_url: &String, saved_file_name: &str) -> Result<(), ErrorWrapper> {
-            let client = Client::new();
+            let mut client_builder = Client::builder().
+                        user_agent(
+                              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+                        );
+            if let Some(proxy) = self.proxy.clone() {
+                  client_builder = client_builder.proxy(proxy);
+            }
+
+            let client = client_builder.build()?;
             let mut bytes = client.get(ts_url).send()?;
             let mut output = File::create(format!("{}.ts", saved_file_name))?;
             io::copy(&mut bytes, &mut output)?;
