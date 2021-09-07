@@ -1,0 +1,16 @@
+{
+      "name": "UESTC Redirector",
+      "description": "The UESTC Redirector helps you redirect to the expirated page after login",
+      "version": "1.0.0",
+      "permissions": [
+            "webRequest",
+            "webRequestBlocking",
+            "tabs",
+            "http://*.uestc.edu.cn/*",
+            "https://*.uestc.edu.cn/*"
+      ],
+      "background": {
+            "scripts": ["lib/redirector.js"]
+      },
+      "manifest_version": 2
+    }
