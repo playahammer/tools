@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <title>Graph Sequence</title>
+</head>
+<body>
+      <input type="text" id="seq-input">
+      <button id="judge">Judge</button>
+      <button id="reset">Reset</button>
+      <button onclick="presuppose(1)">Presuppose1</button>
+      <button onclick="presuppose(2)">Presuppose2</button>
+      <button onclick="presuppose(3)">Presuppose3</button>
+      <input type="hidden" id="presuppose1" value="5 4 3 3 2 2 2 1 1 1">
+      <input type="hidden" id="presuppose2" value="6 5 4 3 3 3 2">
+      <input type="hidden" id="presuppose3" value="7 7 4 3 3 3 2 1">
+      <div id="output"></div>
+      <canvas width="800" height="800" id="drawer"></canvas>
+
+</body>
+<script type="text/javascript">
+
+function returnParseInt(e) {
+      return parseInt(e, 10)
+}
+
+function Edge(iVertex, jVertex) {
+      this.iVertex = iVertex;
+      this.jVertex = jVertex;
+}
+
+Edge.prototype.draw = function(ctx, size, n) {
+      
+      const d = 2 * Math.PI / n;
+      // Draw a new vertex in canvas
+      if (!this.iVertex.isDraw) {
+            let iNmber = parseInt(this.iVertex.name.split("v")[1]);
+            this.iVertex.vx = Math.floor(300 * Math.cos(d * iNmber));
+            this.iVertex.vy = Math.floor(300 * Math.sin(d * iNmber));
+            
+            ctx.beginPath();
+            ctx.arc(this.iVertex.vx, this.iVertex.vy, 2, 0, 2 * Math.PI);
+            ctx.fill();
+
+            let metrics = ctx.measureText(this.iVertex.name);
+            ctx.fillText(this.iVertex.name, 
+                        Math.floor(320 * Math.cos(d * iNmber)),
+                        Math.floor(320 * Math.sin(d * iNmber)) + (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2);
+            this.iVertex.isDraw = !this.iVertex.isDraw;
+      }
+
+      if (!this.jVertex.isDraw) {
+            let jNumber = parseInt(this.jVertex.name.split("v")[1]);
+            this.jVertex.vx = Math.floor(300 * Math.cos(d * jNumber));
+            this.jVertex.vy = Math.floor(300 * Math.sin(d * jNumber));
+
+            ctx.beginPath();
+            ctx.arc(this.jVertex.vx, this.jVertex.vy, 2, 0, 2 * Math.PI);
+            ctx.fill();
+
+            let metrics = ctx.measureText(this.iVertex.name);
+            ctx.fillText(this.jVertex.name, 
+                        Math.floor(320 * Math.cos(d * jNumber)) ,
+                        Math.floor(320 * Math.sin(d * jNumber)) + (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2);
+            this.jVertex.isDraw = !this.jVertex.isDraw;
+      }
+
+      // Draw ege
+      ctx.beginPath();
+      ctx.moveTo(this.iVertex.vx, this.iVertex.vy);
+      ctx.lineTo(this.jVertex.vx, this.jVertex.vy);
+      ctx.stroke();
+
+}
+
+function Vertex(degree, name) {
+      this.degree = degree;
+      this.name = name;
+      this.isOrdered = false;
+      this.vx = 0;
+      this.vy = 0;
+      this.tx = 0;
+      this.ty = 0;
+      this.tmpResult = null;
+}
+
+function GraphSeq(values) {
+      this.values = values;
+}
+
+GraphSeq.prototype.initial = function (){
+      if (!this.values) return;
+      let vertexDegrees = this.values.split(" ").map(returnParseInt).sort((first, second) => {
+            return second - first;
+      });
+
+      this.degree = 0;
+      this.vertexs = new Array();
+      this.length = vertexDegrees.length;
+      vertexDegrees.forEach((element, index) => {
+            this.degree += element;
+            this.vertexs.push(new Vertex(element, "v" + index))
+      });
+
+      if (this.degree % 2 != 0)
+            return false;
+
+      this.removedVertexs = new Array();
+      this.graph = new Array();
+      return true;
+}
+
+GraphSeq.prototype.judge = function(canvasId, callback) {
+      if (!this.initial()) {
+            if (callback != undefined && typeof callback == "function") 
+                  callback(false, null, "Initial error");
+            return;
+      }
+
+      let vertexs = this.vertexs;
+      while (vertexs.length) {
+            let first = vertexs.shift();
+            this.removedVertexs.push(first);
+            if (!first.degree) 
+            {
+                  first.tmpResult = Array.from(vertexs);     
+                  break;
+            }
+            for (let i = 0; i < vertexs.length && i < first.degree; i++) {
+                  if (!vertexs[i].degree) {
+                        console.log(i, vertexs[i].degree);
+                        if (callback != undefined && typeof callback == "function") 
+                              callback(false, null, "False");
+                        return;
+                  }
+                  vertexs[i].degree--;
+            }
+
+            first.tmpResult = Array.from(vertexs);
+            vertexs.sort((first, second) => {
+                  return second.degree - first.degree;
+            })
+      }
+
+      let canvas = document.getElementById(canvasId);
+      this.ctx = canvas.getContext("2d");
+      this.ctx.fillStyle = "black";
+      this.ctx.strokeStyle = "black";
+      this.ctx.font = "20px Arial";
+
+      if (!this.ctx.translated)
+      {
+            this.ctx.translate(canvas.width / 2, canvas.height / 2);
+            this.ctx.translated = !this.ctx.translated;
+      }
+
+      this.ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+
+      while (this.removedVertexs.length) {
+            let end = this.removedVertexs.pop();
+            let tmp = end.tmpResult;
+            if (end.degree) {
+                  for (let i = 0; i < tmp.length && i < end.degree; i++) {
+                        tmp[i].degree++;
+                        let new_ege = new Edge(end, tmp[i])
+                        //Let n vertexs in graph place in n-polygon of vertexs.
+                        new_ege.draw(this.ctx, [canvas.width, canvas.height], this.length);
+                        this.graph.push(new_ege);
+                        //If the callback function is callable, call it when every ege is created.
+                        if (callback != undefined && typeof callback == "function")
+                              callback(true, new_ege, null);
+                  }    
+            }
+            
+      }
+}
+
+window.onload = function() {
+      document.getElementById("judge").addEventListener("click", function(){
+            document.getElementById("output").innerHTML = "";
+            let graphSeq = new GraphSeq(document.getElementById("seq-input").value);
+            graphSeq.judge("drawer", function(flag, ege, err){
+                  if (flag) {
+                        document.getElementById("output").innerHTML += "(" + ege.iVertex.name + ", " + ege.jVertex.name + ") ";
+                  }
+                  else{
+                        document.getElementById("output").innerHTML = err;
+                  }
+            });
+           
+      });
+
+      document.getElementById("reset").addEventListener("click", function(){
+            let canvas = document.getElementById("drawer");
+            let ctx = canvas.getContext("2d");
+            ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+
+            document.getElementById("seq-input").value = "";
+            document.getElementById("output").innerHTML = "";
+      });
+}
+
+function presuppose(n) {
+      document.getElementById("seq-input").value = document.getElementById("presuppose"+n).value;
+}
+
+</script>
+</html>
