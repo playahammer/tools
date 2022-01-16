@@ -1,4 +1,6 @@
 # Ph
+**Attention: This extension now is not able to download the video from Pornhub since the website changed the policy in getting video url**
+
 This is a browser extension for downloading love action media in Pornhub and Xvideos. Note that it only runs on Chrome browser. Before you use this extension, make sure that you switch to open it in extension management panel and click menu bar while you are viewing the page where it contains the video, or the later will display this page doesn't have any avaliable video resource sitted in center of popup page.
 
 ## Updating logs 
